@@ -16,14 +16,6 @@ def generate_launch_description():
             default_value=default_config_path,
             description='Path to the YAML config file with Pepper IP and port'
         ),
-
-        Node(
-            package=pkg_name,
-            executable='wakeup_node',
-            name='wakeup_node',
-            parameters=[config_file],
-            output="screen",
-        ),
         Node(
             package=pkg_name,
             executable='text2speech_node',

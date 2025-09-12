@@ -9,6 +9,10 @@ from pepper_nodes.utils import Session
 class TabletNode(PepperNode):
 
     def __init__(self):
+        """
+        The `__init__` function initializes a TabletNode object by setting up a session, tablet proxy,
+        and services for executing JavaScript and loading URLs.
+        """
         super().__init__('tablet_node')
         self.session = Session(self.ip, self.port)
         self.tablet_proxy = self.session.get_service("ALTabletService")
@@ -20,6 +24,10 @@ class TabletNode(PepperNode):
         self.get_logger().info("TabletNode initialized")
 
     def load_url_callback(self, request, response):
+        """
+        This Python function attempts to show a webview on a tablet using a provided URL and retries if
+        it fails.
+        """
         try:
             self.tablet_proxy.showWebview(request.url)
         except Exception as e:
@@ -30,6 +38,10 @@ class TabletNode(PepperNode):
         return response
 
     def execute_js_callback(self, request, response):
+        """
+        The function `execute_js_callback` attempts to execute a JavaScript callback using a tablet
+        proxy service, handling exceptions and logging warnings if necessary.
+        """
         try:
             self.tablet_proxy.executeJS(request.js)
         except Exception as e:

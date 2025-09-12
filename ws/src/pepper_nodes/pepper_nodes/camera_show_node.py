@@ -9,6 +9,9 @@ import cv2
 class CameraShowNode(Node):
 
     def __init__(self):
+        """
+        The function initializes a node for displaying camera images in a ROS system.
+        """
         super().__init__('camera_show_node')
         self.bridge = CvBridge()
 
@@ -22,6 +25,15 @@ class CameraShowNode(Node):
         self.get_logger().info("CameraShowNode initialized")
 
     def callback(self, msg):
+        """
+        This Python function takes an image message, converts it to a cv2 image, and displays it in a
+        window named "Pepper Camera".
+        
+        :param msg: The `msg` parameter in the `callback` function is likely an image message received
+        from a camera sensor in a ROS (Robot Operating System) environment. The function attempts to
+        convert this image message into a format that OpenCV can work with using
+        `self.bridge.imgmsg_to_cv2
+        """
         try:
             image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
             cv2.imshow("Pepper Camera", image)
