@@ -1,4 +1,4 @@
 /**:
   ros__parameters:
-    pepper_ip: "10.0.1.207"
+    pepper_ip: "10.0.1.230"
     pepper_port: 9559

@@ -26,7 +26,9 @@
         }
     },
     "containerEnv": {
-        "DISPLAY": "host.docker.internal:0"
+        "DISPLAY": "host.docker.internal:0",
+        //Configure your github token to use LLM API
+        "GITHUB_TOKEN": "",
     },
     "runArgs": [
         //"-p", "3389:3389",

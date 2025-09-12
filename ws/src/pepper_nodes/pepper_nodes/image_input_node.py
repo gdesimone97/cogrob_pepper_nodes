@@ -22,6 +22,10 @@ COLORSPACE_RGB = 13
 class ImageInputNode(PepperNode):
 
     def __init__(self):
+        """
+        The function initializes an image input node for capturing RGB camera stream with specified
+        resolution and frame rate.
+        """
         super().__init__('image_input_node')
 
         self.fps = 20
@@ -53,11 +57,19 @@ class ImageInputNode(PepperNode):
         self.get_logger().info("ImageInputNode initialized")
 
     def get_color_frame(self):
+        """
+        This function retrieves a color frame from a camera and returns it as a numpy array.
+        :return: The `get_color_frame` method returns an image frame in RGB format captured by the
+        camera.
+        """
         raw_rgb = self.camera.getImageRemote(self.rgb_sub)
         image = np.frombuffer(raw_rgb[6], np.uint8).reshape(raw_rgb[1], raw_rgb[0], 3)
         return image
 
     def publish_frame(self):
+        """
+        This function publishes a color frame as an image message.
+        """
         frame = self.get_color_frame()
         if frame is not None:
             msg = self.bridge.cv2_to_imgmsg(frame, encoding="rgb8")
@@ -65,6 +77,9 @@ class ImageInputNode(PepperNode):
             self.image_publisher.publish(msg)
 
     def stop(self):
+        """
+        The `stop` function unsubscribes the camera from the RGB topic.
+        """
         self.camera.unsubscribe(self.rgb_sub)
 
 def main():

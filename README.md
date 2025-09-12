@@ -199,3 +199,7 @@ You can open the GUI using an RDP client such as Windows Remote Desktop with the
 ```
 localhost:33890
 ```
+
+> Username: `mivia`
+
+> Password: `mivia`
