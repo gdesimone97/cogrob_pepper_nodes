@@ -17,20 +17,31 @@ RUN apt update && apt install -y ros-humble-rviz2 \
 WORKDIR /root/scripts                        
 RUN pip install pyOpenssl -U
 
+#User Creation
+RUN useradd -m -s /bin/bash mivia \
+    && echo 'mivia:mivia' | chpasswd \
+    && usermod -aG sudo,dialout mivia 
+RUN echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 #Installing RASA
-WORKDIR /root
-RUN pip install rasa==3.6.21 rasa[spacy]
-RUN python3 -m spacy download en_core_web_md
-RUN python3 -m spacy download it_core_news_md
+WORKDIR /opt/
+SHELL ["/bin/bash", "-c"]
+RUN apt install -y python3.10-venv
+RUN python3 -m venv venv --system-site-packages && \
+    source venv/bin/activate && \
+    pip install rasa==3.6.21 rasa[spacy] && \
+    python -m spacy download en_core_web_md && \
+    python -m spacy download it_core_news_md && \
+    ln -s /opt/venv/bin/activate /usr/local/bin/activate_rasa_env && \
+    chmod +x /usr/local/bin/activate_rasa_env
 
 #Fix Pepper 230
 WORKDIR /usr/local/bin
-RUN apt update && apt install -y sshpass
-RUN wget https://github.com/gdesimone97/cogrob_pepper_nodes/releases/download/fix-pepper/fix_pepper 
-RUN chmod +x fix_pepper
+RUN apt update && apt install -y sshpass && \
+    wget https://github.com/gdesimone97/cogrob_pepper_nodes/releases/download/fix-pepper/fix_pepper && \
+    chmod +x fix_pepper
 
 WORKDIR /root
-RUN ln -s /usr/bin/python3 /usr/local/bin/python
 
 #Installing GUI
 ENV DEBIAN_FRONTEND=noninteractive
@@ -44,13 +55,6 @@ RUN apt install -y libx11-dev libgl1-mesa-glx libxext-dev
 
 #Python utils
 RUN pip install httpx
-RUN apt update && apt install -y python3.10-venv
-
-#User Creation
-RUN useradd -m -s /bin/bash mivia \
-    && echo 'mivia:mivia' | chpasswd \
-    && usermod -aG sudo,dialout mivia 
-RUN echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 #Colcon utils
 RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /home/mivia/.bashrc
@@ -64,6 +68,22 @@ RUN chmod +x /home/mivia/install_qi.bash && bash /home/mivia/install_qi.bash
 #Audio libs
 RUN pip install sounddevice soundfile librosa
 RUN apt update && apt install -y portaudio19-dev python3-pyaudio
+
+#Transformers
+RUN pip install --ignore-installed datasets torch==2.8.0 torchcodec transformers==4.56.1 bitsandbytes==0.47 accelerate && \
+    apt update && apt install -y ffmpeg
+
+#Transformers - Optimum
+RUN pip install optimum
+ADD install_onnxruntime.bash /tmp
+RUN bash /tmp/install_onnxruntime.bash
+
+#Cleanup
+
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && rm -rf /root/.cache
+
 
 USER mivia
 WORKDIR /home/mivia/
