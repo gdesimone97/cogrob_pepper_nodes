@@ -70,20 +70,24 @@ RUN pip install sounddevice soundfile librosa
 RUN apt update && apt install -y portaudio19-dev python3-pyaudio
 
 #Transformers
-RUN pip install --ignore-installed datasets torch==2.8.0 torchcodec transformers==4.56.1 bitsandbytes==0.47 accelerate && \
-    apt update && apt install -y ffmpeg
+RUN pip install --ignore-installed datasets \
+                            torch==2.8.0 torchcodec \
+                            transformers==4.56.1 bitsandbytes==0.47 accelerate \
+                            huggingface_hub[cli]
+RUN apt update && apt install -y ffmpeg git-lfs htop
 
 #Transformers - Optimum
-RUN pip install optimum
+RUN pip install optimum onnx==1.19.0
 ADD install_onnxruntime.bash /tmp
 RUN bash /tmp/install_onnxruntime.bash
 
 #Cleanup
-
 RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && rm -rf /root/.cache
 
+#NO MOVE!
+RUN pip install 'numpy<2' 'setuptools<80,>=30.3.0'
 
 USER mivia
 WORKDIR /home/mivia/
@@ -97,6 +101,11 @@ ENV PATH=$PATH:/home/mivia/.local/bin
 # RDP
 EXPOSE 3389
 
+# ROS
 ENV ROS_LOCALHOST_ONLY=1
 ENV ROS_DOMAIN_ID=0
+
+#PYTHON
+ENV PYTHONPATH=/workspace/demo_utils:$PYTHONPATH
+
 ENTRYPOINT ["bash", "/home/mivia/run_xrdp.bash" ]
