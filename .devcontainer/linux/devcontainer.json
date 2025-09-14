@@ -35,6 +35,7 @@
         "--volume=/dev:/dev",
         "-e", "XAUTHORITY=/tmp/.Xauthority",
         "-v", "${localEnv:HOME}/.Xauthority:/tmp/.Xauthority",
+        "--device=/dev/snd:/dev/snd"
         // Uncomment row below to enable GPU support
         //"--gpus=all",
     ],

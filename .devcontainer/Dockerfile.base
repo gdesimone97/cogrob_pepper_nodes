@@ -67,7 +67,7 @@ RUN chmod +x /home/mivia/install_qi.bash && bash /home/mivia/install_qi.bash
 
 #Audio libs
 RUN pip install sounddevice soundfile librosa
-RUN apt update && apt install -y portaudio19-dev python3-pyaudio
+RUN apt update && apt install -y portaudio19-dev python3-pyaudio alsa-base alsa-utils
 
 #Transformers
 RUN pip install --ignore-installed datasets \
@@ -75,11 +75,6 @@ RUN pip install --ignore-installed datasets \
                             transformers==4.56.1 bitsandbytes==0.47 accelerate \
                             huggingface_hub[cli]
 RUN apt update && apt install -y ffmpeg git-lfs htop
-
-#Transformers - Optimum
-RUN pip install optimum onnx==1.19.0
-ADD install_onnxruntime.bash /tmp
-RUN bash /tmp/install_onnxruntime.bash
 
 #Cleanup
 RUN apt-get clean \
@@ -95,6 +90,7 @@ ADD --chown=mivia run_xrdp.bash .
 RUN chmod +x run_xrdp.bash
 RUN echo "xfce4-session" | tee .xsession
 
+# OS
 RUN echo "source /opt/ros/humble/setup.bash" >> .bashrc
 ENV PATH=$PATH:/home/mivia/.local/bin
 
