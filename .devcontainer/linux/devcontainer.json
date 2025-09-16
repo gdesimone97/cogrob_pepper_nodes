@@ -1,6 +1,6 @@
 {
     "name": "Linux Development Container",
-    "privileged": true,
+    "privileged": false,
     "remoteUser": "mivia",
     "build": {
         "dockerfile": "../Dockerfile",
@@ -37,7 +37,8 @@
         "-v", "${localEnv:HOME}/.Xauthority:/tmp/.Xauthority",
         "--device=/dev/snd",
         "--device=/dev/bus/usb",
-        //"--device=//dev/ttyUSB0",
+        "--ipc=host",
+        //"--device=/dev/ttyUSB0",
         
         // Uncomment row below to enable GPU support
         //"--gpus=all",
