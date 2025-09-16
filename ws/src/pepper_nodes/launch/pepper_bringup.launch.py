@@ -39,12 +39,6 @@ def generate_launch_description():
         ),
         Node(
             package=pkg_name,
-            executable='camera_show_node',
-            name='camera_show_node',
-            output="screen",
-        ),
-        Node(
-            package=pkg_name,
             executable='head_motion_node',
             name='head_motion_node',
             parameters=[config_file],
