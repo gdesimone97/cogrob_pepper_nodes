@@ -35,7 +35,10 @@
         "--volume=/dev:/dev",
         "-e", "XAUTHORITY=/tmp/.Xauthority",
         "-v", "${localEnv:HOME}/.Xauthority:/tmp/.Xauthority",
-        "--device=/dev/snd:/dev/snd"
+        "--device=/dev/snd",
+        "--device=/dev/bus/usb",
+        //"--device=//dev/ttyUSB0",
+        
         // Uncomment row below to enable GPU support
         //"--gpus=all",
     ],

@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/LoadUrl.srv"
   "srv/ExecuteJS.srv"
   "srv/Asr.srv"
+  "msg/MetaMic.msg"
   DEPENDENCIES
   std_msgs
 )

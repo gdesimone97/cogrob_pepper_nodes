@@ -7,6 +7,7 @@
   <maintainer email="44608428+gdesimone97@users.noreply.github.com">mivia</maintainer>
   <license>TODO: License declaration</license>
   <depend>pepper_interfaces</depend>
+  <depend>audio_common_msgs</depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

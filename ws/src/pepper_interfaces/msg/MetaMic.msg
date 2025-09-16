@@ -1,0 +1,2 @@
+int64 sample_rate
+int32 chunks_len
