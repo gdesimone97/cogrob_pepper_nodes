@@ -1,9 +1,9 @@
+import numpy as np
+from numpy import ndarray
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 import torch
-import numpy as np
-from numpy_utils import convert2array
 from audio_utils import pcm2float
 from transformers import AutoProcessor, AutoModel, WhisperProcessor
 from pepper_interfaces.srv import Asr
@@ -69,7 +69,7 @@ class ASRNode(Node):
         return processor, generation_config
     
     def predict(self, audio) -> list:
-        audio = np.asanyarray(audio)
+        audio = np.asarray(audio, dtype=np.float32)
         assert audio.ndim == 1, "Audio must be a 1D array"
         assert audio.dtype == np.float32, "Audio must be a float32 array"
         input_features = self.processor(audio, sampling_rate=16000, return_tensors="pt").input_features

@@ -78,7 +78,7 @@ RUN pip install sounddevice soundfile librosa pyaudio
 
 #Respeaker
 RUN python3 -m pip install pyusb==1.0.2 'click>=8.1.3' pixel-ring==0.1.0
-RUN python3 -m pip install -U --ignore-installed transforms3d 'numpy>=1.17.3,<1.25.0'
+RUN python3 -m pip install -U --ignore-installed transforms3d
 
 #Cleanup
 RUN apt-get clean \
@@ -86,13 +86,13 @@ RUN apt-get clean \
     && rm -rf /root/.cache
 
 #Python utils
-RUN pip install -U httpx pyOpenssl
+RUN pip install -U httpx pyOpenssl scipy==1.15.3
 
 #ROS utils
 RUN apt update && apt install -y ros-humble-angles
 
 #NO MOVE!
-RUN pip install 'numpy>=1.17.3,<1.25.0' 'setuptools<80,>=30.3.0'
+RUN pip install numpy==1.26.3 'setuptools<80,>=30.3.0'
 
 USER mivia
 WORKDIR /home/mivia/
