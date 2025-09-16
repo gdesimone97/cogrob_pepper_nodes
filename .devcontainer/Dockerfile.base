@@ -12,25 +12,46 @@ RUN pip install -U pip
 RUN apt update && apt install -y ros-humble-rviz2 \
                                 ros-humble-rqt-common-plugins \
                                 ros-humble-rqt-tf-tree \
-                                ros-humble-rqt-image-view
+                                ros-humble-rqt-image-view \
+                                ros-humble-tf-transformations \
+                                ros-humble-diagnostic-updater  \
+                                ros-humble-image-transport-plugins
 
-WORKDIR /root/scripts                        
-RUN pip install pyOpenssl -U
+#Transformers
+RUN pip install --ignore-installed datasets \
+                            torchcodec \
+                            'transformers[torch]'==4.56.1 bitsandbytes==0.47 accelerate \
+                            huggingface_hub[cli]
+RUN apt update && apt install -y ffmpeg git-lfs htop
 
 #Installing RASA
-WORKDIR /root
-RUN pip install rasa==3.6.21 rasa[spacy]
-RUN python3 -m spacy download en_core_web_md
-RUN python3 -m spacy download it_core_news_md
+WORKDIR /opt/
+SHELL ["/bin/bash", "-c"]
+RUN apt install -y python3.10-venv
+RUN python3 -m venv venv --system-site-packages && \
+    source venv/bin/activate && \
+    pip install rasa==3.6.21 rasa[spacy] && \
+    python -m spacy download en_core_web_md && \
+    python -m spacy download it_core_news_md && \
+    ln -s /opt/venv/bin/activate /usr/local/bin/activate_rasa_env && \
+    chmod +x /usr/local/bin/activate_rasa_env
+
+WORKDIR /root/scripts                        
+RUN pip install pyOpenssl 
+
+#User Creation
+RUN useradd -m -s /bin/bash mivia \
+    && echo 'mivia:mivia' | chpasswd \
+    && usermod -aG sudo,dialout,plugdev mivia 
+RUN echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 #Fix Pepper 230
 WORKDIR /usr/local/bin
-RUN apt update && apt install -y sshpass
-RUN wget https://github.com/gdesimone97/cogrob_pepper_nodes/releases/download/fix-pepper/fix_pepper 
-RUN chmod +x fix_pepper
+RUN apt update && apt install -y sshpass && \
+    wget https://github.com/gdesimone97/cogrob_pepper_nodes/releases/download/fix-pepper/fix_pepper && \
+    chmod +x fix_pepper
 
 WORKDIR /root
-RUN ln -s /usr/bin/python3 /usr/local/bin/python
 
 #Installing GUI
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,16 +63,6 @@ RUN adduser xrdp ssl-cert
 #Installing LibGL
 RUN apt install -y libx11-dev libgl1-mesa-glx libxext-dev
 
-#Python utils
-RUN pip install httpx
-RUN apt update && apt install -y python3.10-venv
-
-#User Creation
-RUN useradd -m -s /bin/bash mivia \
-    && echo 'mivia:mivia' | chpasswd \
-    && usermod -aG sudo,dialout mivia 
-RUN echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 #Colcon utils
 RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /home/mivia/.bashrc
 RUN echo "export _colcon_cd_root=/opt/ros/humble/" >> /home/mivia/.bashrc
@@ -62,8 +73,26 @@ ADD --chown=mivia install_qi.bash /home/mivia/install_qi.bash
 RUN chmod +x /home/mivia/install_qi.bash && bash /home/mivia/install_qi.bash
 
 #Audio libs
-RUN pip install sounddevice soundfile librosa
-RUN apt update && apt install -y portaudio19-dev python3-pyaudio
+RUN apt update && apt install -y portaudio19-dev alsa-base alsa-utils
+RUN pip install sounddevice soundfile librosa pyaudio 
+
+#Respeaker
+RUN python3 -m pip install pyusb==1.0.2 'click>=8.1.3' pixel-ring==0.1.0
+RUN python3 -m pip install -U --ignore-installed transforms3d
+
+#Cleanup
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && rm -rf /root/.cache
+
+#Python utils
+RUN pip install -U httpx pyOpenssl scipy==1.15.3
+
+#ROS utils
+RUN apt update && apt install -y ros-humble-angles
+
+#NO MOVE!
+RUN pip install numpy==1.26.3 'setuptools<80,>=30.3.0'
 
 USER mivia
 WORKDIR /home/mivia/
@@ -71,12 +100,18 @@ ADD --chown=mivia run_xrdp.bash .
 RUN chmod +x run_xrdp.bash
 RUN echo "xfce4-session" | tee .xsession
 
+# OS
 RUN echo "source /opt/ros/humble/setup.bash" >> .bashrc
 ENV PATH=$PATH:/home/mivia/.local/bin
 
 # RDP
 EXPOSE 3389
 
+# ROS
 ENV ROS_LOCALHOST_ONLY=1
 ENV ROS_DOMAIN_ID=0
+
+#PYTHON
+ENV PYTHONPATH=/workspace/demo_utils:$PYTHONPATH
+
 ENTRYPOINT ["bash", "/home/mivia/run_xrdp.bash" ]
