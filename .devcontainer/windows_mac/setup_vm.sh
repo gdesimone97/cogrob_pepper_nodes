@@ -91,3 +91,7 @@ export ROS_DOMAIN_ID=0
 export PYTHONPATH=/workspace/demo_utils:$PYTHONPATH
 
 EOF
+
+source configure_dev.bash
+
+reboot
