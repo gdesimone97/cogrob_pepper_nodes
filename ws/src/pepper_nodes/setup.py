@@ -32,7 +32,7 @@ setup(
             'camera_show_node = pepper_nodes.camera_show_node:main',
             'head_motion_node = pepper_nodes.head_motion_node:main',
             'asr_whisper = pepper_nodes.asr:main',
-            'respeaker_mic = pepper_nodes.respeaker_node:main'
+            'respeaker_mic = pepper_nodes.respeaker.respeaker_node:main'
         ],
     },
 )
