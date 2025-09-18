@@ -18,6 +18,13 @@ def generate_launch_description():
         ),
         Node(
             package=pkg_name,
+            executable='wakeup_node',
+            name='wakeup_node',
+            parameters=[config_file],
+            output="screen",
+        ),
+        Node(
+            package=pkg_name,
             executable='text2speech_node',
             name='text2speech_node',
             parameters=[config_file],
