@@ -94,6 +94,9 @@ RUN apt update && apt install -y ros-humble-angles
 #NO MOVE!
 RUN pip install numpy==1.26.3 'setuptools<80,>=30.3.0'
 
+#UDEV
+RUN echo SUBSYSTEM=="usb", ATTR{idVendor}=="2886", ATTR{idProduct}=="0018", GROUP="dialout", MODE="0660" >> /etc/udev/rules.d/99-usb-dialout.rules
+
 USER mivia
 WORKDIR /home/mivia/
 ADD --chown=mivia run_xrdp.bash .
@@ -112,6 +115,6 @@ ENV ROS_LOCALHOST_ONLY=1
 ENV ROS_DOMAIN_ID=0
 
 #PYTHON
-ENV PYTHONPATH=/workspace/demo_utils:$PYTHONPATH
+ENV PYTHONPATH=/workspace/demo_utils
 
 ENTRYPOINT ["bash", "/home/mivia/run_xrdp.bash" ]
