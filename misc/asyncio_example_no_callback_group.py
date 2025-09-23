@@ -3,10 +3,13 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 import time
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 class BlockingNode(Node):
     def __init__(self):
         super().__init__('blocking_node')
+        self.fut = None
 
         # Subscriber that simulates a blocking operation
         self.test_server = self.create_service(
@@ -25,16 +28,19 @@ class BlockingNode(Node):
 
     def timer_callback(self):
         self.get_logger().info('Timer callback running.')
-        if self.client.wait_for_service(timeout_sec=1.0):
-            req = Empty.Request()
-            self.client.call(req)
-        else:
-            self.get_logger().error('Service not available, waiting again...')
+        if self.fut is None or self.fut.done():
+            if self.client.wait_for_service(timeout_sec=1.0):
+                req = Empty.Request()
+                self.fut = self.client.call_async(req)
+            else:
+                self.get_logger().error('Service not available, waiting again...')
 
 def main(args=None):
     rclpy.init(args=args)
     node = BlockingNode()
-    rclpy.spin(node)
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+    executor.spin()
     node.destroy_node()
     rclpy.shutdown()
 
