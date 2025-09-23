@@ -1,0 +1,39 @@
+{
+    "name": "Windows Development Container",
+    "privileged": false,
+    "remoteUser": "mivia",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "args": {
+        }
+    },
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "customizations": {
+        "vscode": {
+            "extensions":[
+                "ms-azuretools.vscode-docker",
+                "ms-python.vscode-pylance",
+                "ms-python.python",
+                "mhutchie.git-graph",
+                "oderwat.indent-rainbow",
+                "mintlify.document",
+                "tal7aouy.rainbow-bracket",
+                "mechatroner.rainbow-csv",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.live-server",
+            ]
+        }
+    },
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}",
+        //Configure your github token to use LLM API
+        "GITHUB_TOKEN": ""
+    },
+    "runArgs": [
+    ],
+    "mounts": [
+    ],
+    "postCreateCommand": "echo 'source /workspace/ws/install/setup.bash' >> /home/mivia/.bashrc",
+    "overrideCommand": true
+}
