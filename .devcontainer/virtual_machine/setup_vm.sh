@@ -3,6 +3,9 @@ set -e
 
 #Installing ROS
 sudo -s
+mkdir -p /workspace
+chown mivia /workspace
+ln -s /workspace /home/mivia && chown mivia /home/mivia
 echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers #Disable sudo password for user mivia
 su mivia
 sudo apt update && sudo apt install –y git
