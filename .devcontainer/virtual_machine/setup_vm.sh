@@ -4,17 +4,18 @@ set -e
 #Installing ROS
 sudo -s
 mkdir -p /workspace
-chown mivia /workspace
+git clone https://github.com/gdesimone97/cogrob_pepper_nodes.git /workspace
+chown -R mivia /workspace
 ln -s /workspace /home/mivia && chown mivia /home/mivia
 echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers #Disable sudo password for user mivia
 su mivia
 sudo apt update && sudo apt install –y git
-cd /workspace/.devcontainer/windows_mac
+cd /workspace/.devcontainer/virtual_machine
 bash ros2_humble_install.bash
 bash ros2-tools.bash
 
 sudo -s
-cd /workspace/.devcontainer/windows_mac
+cd /workspace/.devcontainer/virtual_machine
 
 apt update && apt install -y iputils-ping net-tools nano gedit x11-apps mlocate python3-pip curl wget sudo ffmpeg git-lfs htop
 
