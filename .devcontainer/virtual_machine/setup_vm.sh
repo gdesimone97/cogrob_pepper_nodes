@@ -6,7 +6,7 @@ sudo -s
 mkdir -p /workspace
 git clone https://github.com/gdesimone97/cogrob_pepper_nodes.git /workspace
 chown -R mivia /workspace
-ln -s /workspace /home/mivia && chown mivia /home/mivia
+ln -s /workspace /home/mivia && chown mivia /home/mivia/workspace 
 echo "mivia ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers #Disable sudo password for user mivia
 su mivia
 sudo apt update && sudo apt install –y git
