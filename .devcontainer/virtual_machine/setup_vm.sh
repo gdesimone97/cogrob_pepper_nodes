@@ -57,7 +57,7 @@ chmod +x fix_pepper
 
 
 #NAOqi
-cd /workspace/.devcontainer/windows_mac
+cd /workspace/.devcontainer/virtual_machine
 cp ../install_qi.bash /tmp/
 bash /tmp/install_qi.bash
 
