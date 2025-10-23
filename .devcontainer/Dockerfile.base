@@ -1,5 +1,6 @@
 FROM ros:humble
 
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y iputils-ping net-tools nano gedit x11-apps mlocate python3-pip curl wget sudo
 
 #Configure Timezone
@@ -17,24 +18,31 @@ RUN apt update && apt install -y ros-humble-rviz2 \
                                 ros-humble-diagnostic-updater  \
                                 ros-humble-image-transport-plugins
 
-#Transformers
+#Transformers & YOLO
 RUN pip install --ignore-installed datasets \
                             torchcodec \
                             'transformers[torch]'==4.56.1 bitsandbytes==0.47 accelerate \
                             huggingface_hub[cli]
+
+#Cleanup
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && rm -rf /root/.cache
+
 RUN apt update && apt install -y ffmpeg git-lfs htop
 
-#Installing RASA
-WORKDIR /opt/
-SHELL ["/bin/bash", "-c"]
-RUN apt install -y python3.10-venv
-RUN python3 -m venv venv --system-site-packages && \
-    source venv/bin/activate && \
-    pip install rasa==3.6.21 rasa[spacy] && \
-    python -m spacy download en_core_web_md && \
-    python -m spacy download it_core_news_md && \
-    ln -s /opt/venv/bin/activate /usr/local/bin/activate_rasa_env && \
-    chmod +x /usr/local/bin/activate_rasa_env
+# #Installing RASA
+# WORKDIR /opt/
+# SHELL ["/bin/bash", "-c"]
+# RUN apt install -y python3.10-venv
+# RUN python3 -m venv venv --system-site-packages && \
+#     source venv/bin/activate && \
+#     pip install jax==0.4.30 jaxlib==0.4.30 && \
+#     pip install rasa==3.6.21 rasa[spacy] && \
+#     ( python -m spacy download en_core_web_md || python -m spacy download en_core_web_sm ) && \
+#     ( python -m spacy download it_core_news_md || python -m spacy download it_core_news_sm ) && \
+#     ln -s /opt/venv/bin/activate /usr/local/bin/activate_rasa_env && \
+#     chmod +x /usr/local/bin/activate_rasa_env
 
 WORKDIR /root/scripts                        
 RUN pip install pyOpenssl 
@@ -87,6 +95,9 @@ RUN apt-get clean \
 
 #Python utils
 RUN pip install -U httpx pyOpenssl scipy==1.15.3
+
+#YOLO
+RUN pip --no-deps install ultralytics==8.3.220
 
 #ROS utils
 RUN apt update && apt install -y ros-humble-angles

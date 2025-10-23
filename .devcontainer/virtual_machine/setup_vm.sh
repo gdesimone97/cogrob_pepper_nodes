@@ -69,6 +69,9 @@ pip install sounddevice soundfile librosa pyaudio
 python3 -m pip install pyusb==1.0.2 'click>=8.1.3' pixel-ring==0.1.0
 python3 -m pip install -U --ignore-installed transforms3d
 
+# YOLO
+python3 -m pip install ultralytics==8.3.220
+
 # #Cleanup
 apt-get clean \
 && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \

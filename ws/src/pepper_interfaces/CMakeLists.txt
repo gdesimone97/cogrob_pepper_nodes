@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_runtime REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -22,9 +23,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/LoadUrl.srv"
   "srv/ExecuteJS.srv"
   "srv/Asr.srv"
+  "srv/ObjectDetection.srv"
   "msg/MetaMic.msg"
+  "msg/Detection.msg"
   DEPENDENCIES
   std_msgs
+  sensor_msgs
 )
 
 
