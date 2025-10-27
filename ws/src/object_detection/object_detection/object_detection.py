@@ -1,6 +1,8 @@
 from ultralytics import YOLO
 import rclpy
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from sensor_msgs.msg import Image
 from pepper_interfaces.srv import ObjectDetection
 from pepper_interfaces.msg import Detection
@@ -13,15 +15,16 @@ class ObjDetector(Node):
 
     def __init__(self):
         super().__init__(self.NODE_NAME)
-        self.model = YOLO("yolo11n")
+        self.model = YOLO("yolo11n") #Model can be changed to other YOLOv8 models like "yolov8n", "yolov8s", etc. https://docs.ultralytics.com/it/models/yolo11/#performance-metrics
         self.br = CvBridge()
-        self.sub_image = self.create_subscription(Image, "/in_rgb", self.detect, qos_profile=1)
-        self.detect_srv = self.create_service(ObjectDetection, "detect_objects", self.detect_callback)
+        self.sub_image = self.create_subscription(Image, "/in_rgb", self.detect, qos_profile=1, callback_group=MutuallyExclusiveCallbackGroup())
+        self.detect_srv = self.create_service(ObjectDetection, "detect_objects", self.detect_callback, callback_group=MutuallyExclusiveCallbackGroup())
         self.pub_image = self.create_publisher(Image, "/in_rgb/detect", qos_profile=10)
         self.get_logger().info("Object Detector Node has been started.")
     
     def detect(self, img_msg: Image):
         img = self.br.imgmsg_to_cv2(img_msg)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         predict = self.model(img)[0]
         nw_img = self._draw_boxes(img, predict)
         nw_img_msg = self.br.cv2_to_imgmsg(nw_img, encoding='rgb8')
@@ -77,7 +80,9 @@ def test():
     curr_dir = Path(__file__).parent
     rclpy.init()
     node = ObjDetector()
-    th = Thread(target=rclpy.spin, args=(node,), daemon=True)
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+    th = Thread(target=executor.spin, daemon=True)
     th.start()
     image = cv2.imread(curr_dir.joinpath("bus.jpg").as_posix())
     assert image is not None, "Image not found"
@@ -93,7 +98,9 @@ def test():
 def main():
     rclpy.init()
     node = ObjDetector()
-    rclpy.spin(node)
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+    executor.spin()
 
 if __name__ == "__main__":
     test()

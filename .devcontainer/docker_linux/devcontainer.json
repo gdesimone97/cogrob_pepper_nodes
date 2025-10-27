@@ -1,6 +1,6 @@
 {
     "name": "Linux Development Container",
-    "privileged": false,
+    "privileged": true,
     "remoteUser": "mivia",
     "build": {
         "dockerfile": "../Dockerfile",
