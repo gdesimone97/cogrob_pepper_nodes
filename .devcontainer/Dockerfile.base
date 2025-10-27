@@ -97,7 +97,8 @@ RUN apt-get clean \
 RUN pip install -U httpx pyOpenssl scipy==1.15.3
 
 #YOLO
-RUN pip --no-deps install ultralytics==8.3.220
+RUN python3 -m pip install --no-deps ultralytics==8.3.220 && \
+    python3 -m pip instal torchvision==0.23 ultralytics-thop>=2.0.0 polars
 
 #ROS utils
 RUN apt update && apt install -y ros-humble-angles
