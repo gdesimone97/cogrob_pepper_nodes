@@ -1,0 +1,89 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update && apt install -y \
+    git \
+    wget \
+    build-essential \
+    cmake \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel \
+    unzip
+
+RUN pip3 install -U pip
+RUN pip3 install "cmake>=3.23"
+
+# install/upgrade Conan 2
+RUN pip install --upgrade conan==2.10
+# create a default profile
+RUN conan profile detect
+
+# GitHub is available, but you can also use internal GitLab.
+
+WORKDIR /root
+ENV HOME=/root
+ENV QI_REPOSITORY="https://github.com/aldebaran/libqi.git"
+ENV QI_VERSION="4.0.5"
+ENV QI_PATH="$HOME/libqi"
+RUN git clone \
+  --depth=1 `# Only fetch one commit.` \
+  --branch "qi-framework-v${QI_VERSION}" \
+  "${QI_REPOSITORY}" \
+  "${QI_PATH}"
+RUN conan export "${QI_PATH}" \
+  --version "${QI_VERSION}" # Technically not required but some
+                            # versions of libqi require it
+                            # because of a bug.
+
+#Boost
+RUN apt update && \
+apt install -y build-essential g++ python3-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+
+WORKDIR /root
+ENV QI_PYTHON_VERSION=3.1.5                            
+RUN git clone https://github.com/aldebaran/libqi-python.git -b qi-python-v${QI_PYTHON_VERSION}
+#ADD libqi-python-qi-python-v3.1.5.zip .
+SHELL [ "/bin/bash" , "-c"]
+WORKDIR /root/libqi-python
+
+RUN apt update && apt install -y sudo nano net-tools
+
+RUN conan install . --build=missing -s build_type=Debug -c tools.build:skip_test=true -c '&:tools.build:skip_test=false'
+ENV PRESET=conan-linux-armv8-gcc-debug
+RUN cmake --preset ${PRESET}
+RUN cmake --build --preset ${PRESET}
+
+RUN pip3 install pytest pytest-timeout
+RUN source build/linux-armv8-gcc-debug/generators/conanrun.sh && \
+ctest --preset ${PRESET} --output-on-failure && \
+source build/linux-armv8-gcc-debug/generators/deactivate_conanrun.sh
+
+RUN cmake \
+  --install build/linux-armv8-gcc-debug \
+  --component Module --prefix ~/my-libqi-python-install
+
+RUN conan install . \
+--build=missing `# Build dependencies binaries that are missing in Conan.` \
+-c tools.build:skip_test=true # Skip any test.
+
+RUN pip install -U build
+RUN python3 -m build \
+  --config-setting cmake.define.CMAKE_TOOLCHAIN_FILE=/root/libqi-python/build/linux-armv8-gcc-release/generators/conan_toolchain.cmake
+
+RUN apt install -y patchelf
+RUN pip install -U auditwheel # or `delocate` on MacOS.
+RUN auditwheel repair \
+  --strip `# Strip debugging symbols to get a lighter archive.` \
+  `# The desired platform, which may differ depending on your build host.` \
+  `# With Ubuntu 20.04, we can target manylinux_2_31. Newer versions of` \
+  `# Ubuntu will have to target newer versions of manylinux.` \
+  `# If you don't need a manylinux archive, you can also target the` \
+  `# 'linux_arm64' platform.` \
+  --plat manylinux_2_39_aarch64 \
+  `# Path to the wheel archive.` \
+  dist/qi-*.whl
+
+RUN cp /root/libqi-python/dist/*.whl /root
+#RUN cp /root/libqi-python/wheelhouse/qi-3.1.5-cp310-cp310-manylinux_2_39_aarch64.whl /root
+CMD [ "bash" ]
