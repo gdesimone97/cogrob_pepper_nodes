@@ -5,7 +5,7 @@ from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from sensor_msgs.msg import Image
 from pepper_interfaces.srv import ObjectDetection
-from pepper_interfaces.msg import Detection
+from pepper_interfaces.msg import Detection, Detections
 import cv2
 from cv_bridge import CvBridge
 from typing import List
@@ -19,22 +19,25 @@ class ObjDetector(Node):
         self.br = CvBridge()
         self.sub_image = self.create_subscription(Image, "/in_rgb", self.detect, qos_profile=1, callback_group=MutuallyExclusiveCallbackGroup())
         self.detect_srv = self.create_service(ObjectDetection, "detect_objects", self.detect_callback, callback_group=MutuallyExclusiveCallbackGroup())
-        self.pub_image = self.create_publisher(Image, "/in_rgb/detect", qos_profile=10)
+        self.pub_image = self.create_publisher(Image, "/in_rgb/view", qos_profile=10)
+        self.pub_detections = self.create_publisher(Detections, "/in_rgb/detect", qos_profile=10)
         self.get_logger().info("Object Detector Node has been started.")
     
     def detect(self, img_msg: Image):
         img = self.br.imgmsg_to_cv2(img_msg)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         predict = self.model(img)[0]
+        detections = self._predict2detect_msg(predict)
+        msg = Detections(detections=detections)
+        self.pub_detections.publish(msg)
         nw_img = self._draw_boxes(img, predict)
         nw_img_msg = self.br.cv2_to_imgmsg(nw_img, encoding='rgb8')
         self.pub_image.publish(nw_img_msg)
-        return predict
+        return detections
     
     def detect_callback(self, request: ObjectDetection.Request, response: ObjectDetection.Response):
         img_msg = request.image
-        predict = self.detect(img_msg)
-        detections = self._predict2detect_msg(predict)
+        detections = self.detect(img_msg)
         response.detections = detections
         return response
     

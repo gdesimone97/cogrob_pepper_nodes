@@ -26,6 +26,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ObjectDetection.srv"
   "msg/MetaMic.msg"
   "msg/Detection.msg"
+  "msg/Detections.msg"
   DEPENDENCIES
   std_msgs
   sensor_msgs
