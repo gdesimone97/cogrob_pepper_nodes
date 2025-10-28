@@ -48,7 +48,11 @@ class ImageInputNode(PepperNode):
         self.rgb_sub = self.camera.subscribeCamera("RGB Stream", rgb_camera, resolution, COLORSPACE_RGB, self.fps)
 
         if not self.rgb_sub:
-            raise Exception("Camera is not initialized properly")
+            subs = self.camera.getSubscribers()
+            [self.camera.unsubscribe(s) for s in subs]
+            self.rgb_sub = self.camera.subscribeCamera("RGB Stream", rgb_camera, resolution, COLORSPACE_RGB, self.fps)
+            if not self.rgb_sub:
+                raise Exception("Camera is not initialized properly")
 
         self.image_publisher = self.create_publisher(Image, 'in_rgb', 1)
         self.bridge = CvBridge()
