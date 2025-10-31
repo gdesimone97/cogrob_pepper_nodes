@@ -27,6 +27,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MetaMic.msg"
   "msg/Detection.msg"
   "msg/Detections.msg"
+  "msg/SoftBioInfo.msg"
+  "msg/SoftBioList.msg"
   DEPENDENCIES
   std_msgs
   sensor_msgs
