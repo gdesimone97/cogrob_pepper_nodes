@@ -17,10 +17,10 @@ class ObjDetector(Node):
         super().__init__(self.NODE_NAME)
         self.model = YOLO("yolo11n") #Model can be changed to other YOLOv8 models like "yolov8n", "yolov8s", etc. https://docs.ultralytics.com/it/models/yolo11/#performance-metrics
         self.br = CvBridge()
-        self.sub_image = self.create_subscription(Image, "/in_rgb", self.detect, qos_profile=1, callback_group=MutuallyExclusiveCallbackGroup())
-        self.detect_srv = self.create_service(ObjectDetection, "detect_objects", self.detect_callback, callback_group=MutuallyExclusiveCallbackGroup())
-        self.pub_image = self.create_publisher(Image, "/in_rgb/view", qos_profile=10)
         self.pub_detections = self.create_publisher(Detections, "/in_rgb/detect", qos_profile=10)
+        self.pub_image = self.create_publisher(Image, "/in_rgb/view", qos_profile=10)
+        self.detect_srv = self.create_service(ObjectDetection, "detect_objects", self.detect_callback, callback_group=MutuallyExclusiveCallbackGroup())
+        self.sub_image = self.create_subscription(Image, "/in_rgb", self.detect, qos_profile=1, callback_group=MutuallyExclusiveCallbackGroup())
         self.get_logger().info("Object Detector Node has been started.")
     
     def detect(self, img_msg: Image):
